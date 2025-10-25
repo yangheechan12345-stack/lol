@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI Chatbot</title>
+    </head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .chat-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            max-height: 1000px;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .chat-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 20px;
+            overflow: hidden;
+            min-height: 0;
+        }
+        
+        #setting-area {
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            flex-shrink: 0;
+        }
+        
+        #setting-area label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 13px;
+        }
+
+        .api-key-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        #api-key-input {
+            width: 100%;
+            padding: 10px 50px 10px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            transition: border-color 0.3s ease;
+            background: white;
+            height: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+            font-size: 14px;
+            color: #667eea;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-password:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        #system-prompt {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 13px;
+            min-height: 60px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        
+        #api-key-input:focus, #system-prompt:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 8px;
+            min-height: 200px;
+        }
+        
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 3px;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #c1c8cd;
+            border-radius: 3px;
+        }
+        
+        .message {
+            margin-bottom: 12px;
+            max-width: 85%;
+            padding: 14px 16px;
+            border-radius: 18px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-bot {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #333;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        .message-user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            margin-left: auto;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 6px;
+            text-align: right;
+        }
+        
+        .typing-indicator {
+            display: none;
+            font-style: italic;
+            color: #6c757d;
+            margin: 8px 0;
+            padding: 10px 16px;
+            background: #f8f9fa;
+            border-radius: 18px;
+            max-width: 180px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 8px;
+            resize: none;
+            min-height: 40px;
+            max-height: 100px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 70px;
+            height: 40px;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+        
+        .send-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-section {
+                height: 95vh;
+                border-radius: 12px;
+            }
+            
+            #setting-area {
+                padding: 10px;
+            }
+            
+            .chat-input-container {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chat-section {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            #setting-area {
+                padding: 8px;
+            }
+            
+            .chat-input {
+                font-size: 16px;
+            }
+        }
+    </style>
+    <body>
+        <div class="chat-section">
+            <div class="chat-header">
+                <h1>🤖 AI Chatbot</h1>
+            </div>
+            <div class="chat-content">
+                <div id="setting-area">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label for="api-key-input">API 키:</label>
+                        <a href="https://aistudio.google.com/apikey" target="_blank" style="color: #667eea; text-decoration: none; font-size: 11px; padding: 4px 8px; background: white; border-radius: 12px; border: 1px solid #667eea; transition: all 0.3s ease;">
+                            🔑 API 키 발급받기
+                        </a>
+                    </div>
+                    <div class="api-key-input-container">
+                        <input type="password" id="api-key-input" placeholder="Gemini API 키를 입력하세요">
+                        <button type="button" class="toggle-password" onclick="togglePassword()" title="API 키 표시/숨기기">
+                            🔒
+                        </button>
+                    </div>
+                    
+                    <label for="system-prompt">시스템 프롬프트:</label>
+                    <textarea id="system-prompt" rows="3" placeholder="AI의 역할을 설정하세요...">당신은 친근하고 도움이 되는 AI 어시스턴트입니다. 한국어로 답변해주세요.</textarea>
+                </div>
+                
+                <div id="chat-area" class="chat-area"></div>
+                
+                <div id="typing-indicator" class="typing-indicator">
+                    AI가 답변을 작성 중입니다...
+                </div>
+                
+                <div class="chat-input-container">
+                    <textarea id="chat-input" class="chat-input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+                    <button id="send-btn" class="send-btn">전송</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // API 키 토글 함수
+            function togglePassword() {
+                const apiKeyInput = document.getElementById('api-key-input');
+                const toggleButton = document.querySelector('.toggle-password');
+                
+                if (apiKeyInput.type === 'password') {
+                    apiKeyInput.type = 'text';
+                    toggleButton.innerHTML = '👁️';
+                    toggleButton.title = 'API 키 숨기기';
+                } else {
+                    apiKeyInput.type = 'password';
+                    toggleButton.innerHTML = '🔒';
+                    toggleButton.title = 'API 키 표시';
+                }
+            }
+
+            // DOM 요소
+            const apiKeyInput = document.getElementById('api-key-input');
+            const systemPrompt = document.getElementById('system-prompt');
+            const chatArea = document.getElementById('chat-area');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+            const typingIndicator = document.getElementById('typing-indicator');
+
+            // 대화 기록 저장
+            let conversationHistory = [];
+            const MAX_HISTORY = 10; // 최대 기억할 대화 쌍의 수
+
+            // 메시지 추가 함수
+            function addMessage(type, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message message-${type}`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.innerHTML = text.replace(/\n/g, '<br>');
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString('ko-KR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                messageDiv.appendChild(textDiv);
+                messageDiv.appendChild(timeDiv);
+                chatArea.appendChild(messageDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+                // 대화 기록 저장
+                if (type === 'user') {
+                    conversationHistory.push({ role: 'user', content: text });
+                } else if (type === 'bot') {
+                    conversationHistory.push({ role: 'assistant', content: text });
+                    // 대화 기록이 너무 길어지면 오래된 대화 제거
+                    if (conversationHistory.length > MAX_HISTORY * 2) {
+                        conversationHistory = conversationHistory.slice(-MAX_HISTORY * 2);
+                    }
+                }
+            }
+
+            // 대화 기록을 포맷팅하는 함수
+            function formatConversationHistory() {
+                let formattedHistory = '';
+                for (const message of conversationHistory) {
+                    formattedHistory += `${message.role === 'user' ? 'User' : 'Assistant'}: ${message.content}\n`;
+                }
+                return formattedHistory;
+            }
+
+            // 디버그 로깅 함수
+            function logDebug(type, content) {
+                const timestamp = new Date().toLocaleTimeString('ko-KR');
+                console.group(`🔍 ${type} [${timestamp}]`);
+                console.log(content);
+                console.groupEnd();
+            }
+
+            // API 호출 함수
+            async function sendRequest() {
+                const apiKey = apiKeyInput.value.trim();
+                const systemPrompt = document.getElementById('system-prompt').value.trim();
+                const message = chatInput.value.trim();
+
+                if (!apiKey) {
+                    addMessage('bot', '❌ API 키를 입력해주세요.');
+                    return;
+                }
+
+                if (!message) return;
+
+                // UI 상태 업데이트
+                sendBtn.disabled = true;
+                chatInput.disabled = true;
+                typingIndicator.style.display = 'block';
+
+                // 사용자 메시지 표시
+                addMessage('user', message);
+                chatInput.value = '';
+
+                try {
+                    // 시스템 프롬프트와 대화 기록을 포함한 전체 프롬프트 구성
+                    const fullPrompt = `${systemPrompt}\n\n=== 이전 대화 ===\n${formatConversationHistory()}\n=== 현재 대화 ===\nUser: ${message}\nAssistant:`;
+
+                    // 프롬프트 로깅
+                    console.group('📝 대화 상태');
+                    logDebug('시스템 프롬프트', systemPrompt);
+                    logDebug('대화 기록', conversationHistory);
+                    logDebug('현재 메시지', message);
+                    logDebug('최종 프롬프트', fullPrompt);
+                    console.groupEnd();
+
+                    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-goog-api-key': apiKey
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: fullPrompt
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.7,
+                                topK: 40,
+                                topP: 0.95,
+                                maxOutputTokens: 1024
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API 오류 (상태 코드: ${response.status})`);
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.candidates && data.candidates[0].content) {
+                        const aiResponse = data.candidates[0].content.parts[0].text;
+                        // AI 응답 로깅
+                        logDebug('AI 응답', aiResponse);
+                        addMessage('bot', aiResponse);
+                    } else {
+                        throw new Error('응답 형식이 올바르지 않습니다.');
+                    }
+                } catch (error) {
+                    // 에러 로깅
+                    console.error('🚨 API 호출 오류:', error);
+                    console.error('상세 정보:', error.stack);
+                    addMessage('bot', `❌ 오류가 발생했습니다: ${error.message}`);
+                } finally {
+                    // UI 상태 복원
+                    sendBtn.disabled = false;
+                    chatInput.disabled = false;
+                    typingIndicator.style.display = 'none';
+                    chatInput.focus();
+                }
+            }
+
+            // 이벤트 리스너
+            sendBtn.addEventListener('click', sendRequest);
+
+            chatInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendRequest();
+                }
+            });
+
+            // 채팅 입력창 자동 높이 조절
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+
+            // 초기 메시지 추가
+            addMessage('bot', '안녕하세요! 저는 AI 어시스턴트입니다. API 키를 입력하고 대화를 시작해보세요! 😊');
+        </script>
+    </body>
+</html>

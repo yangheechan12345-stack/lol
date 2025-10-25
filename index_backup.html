@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Way back home - 숀(SHAUN)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            cursor: pointer;
+            display: block;
+            text-decoration: none;
+        }
+
+        .video-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover img {
+            opacity: 0.8;
+        }
+
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 0, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .video-container:hover .play-button {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: rgba(255, 0, 0, 1);
+        }
+
+        .play-button::after {
+            content: "";
+            width: 0;
+            height: 0;
+            border-left: 25px solid white;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            margin-left: 5px;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .song-info {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 40px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .song-title {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .artist-name {
+            font-size: 1.5em;
+            color: #764ba2;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .lyrics-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #fef9ff 100%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .lyrics-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 35px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .lyrics-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .lyrics {
+            line-height: 2.2;
+            color: #2d3748;
+            font-size: 1.1em;
+            white-space: pre-line;
+        }
+
+        .lyrics-verse {
+            margin-bottom: 35px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lyrics-verse::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea, #764ba2);
+        }
+
+        .lyrics-verse:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .lyrics-verse:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 첫 번째와 마지막 구절 강조 */
+        .lyrics-verse:first-child,
+        .lyrics-verse:nth-last-child(2) {
+            background: linear-gradient(135deg, #fef9ff 0%, #f5f7fa 100%);
+            border: 2px solid #e9d5ff;
+        }
+
+        .lyrics-verse:first-child::before,
+        .lyrics-verse:nth-last-child(2)::before {
+            width: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px;
+            }
+
+            .song-title {
+                font-size: 2.2em;
+            }
+
+            .artist-name {
+                font-size: 1.3em;
+            }
+
+            .lyrics-section {
+                padding: 25px;
+            }
+
+            .lyrics {
+                font-size: 1em;
+                line-height: 2;
+            }
+
+            .lyrics-verse {
+                padding: 20px;
+                margin-bottom: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .song-title {
+                font-size: 1.8em;
+            }
+
+            .artist-name {
+                font-size: 1.1em;
+            }
+
+            .lyrics-section {
+                padding: 20px;
+            }
+
+            .lyrics-verse {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="https://www.youtube.com/watch?v=amOSaNX7KJg" target="_blank" class="video-container">
+            <img src="https://img.youtube.com/vi/amOSaNX7KJg/maxresdefault.jpg" alt="Way back home 썸네일">
+            <div class="play-button"></div>
+        </a>
+
+        <div class="content">
+            <div class="song-info">
+                <h1 class="song-title">Way back home</h1>
+                <p class="artist-name">숀(SHAUN)</p>
+            </div>
+
+            <div class="lyrics-section">
+                <h2 class="lyrics-title">가사</h2>
+                <div class="lyrics">
+                    <div class="lyrics-verse">멈춘 시간 속 잠든 너를 찾아가
+아무리 막아도 결국 너의 곁인 걸
+길고 긴 여행을 끝내 이젠 돌아가
+너라는 집으로 지금 다시 way back home</div>
+
+                    <div class="lyrics-verse">아무리 힘껏 닫아도 다시 열린 서랍 같아
+하늘로 높이 날린 넌 자꾸 내게 되돌아와
+힘들게 삼킨 이별도 다 그대로인 걸 oh oh oh (oh oh oh)</div>
+
+                    <div class="lyrics-verse">수없이 떠난 길 위에서 난 너를 발견하고
+비우려 했던 맘은 또 이렇게 너로 차올라
+발걸음의 끝에 늘 네가 부딪혀
+그만, 그만</div>
+
+                    <div class="lyrics-verse">멈춘 시간 속 잠든 너를 찾아가
+아무리 막아도 결국 너의 곁인 걸
+길고 긴 여행을 끝내 이젠 돌아가
+너라는 집으로 지금 다시 way back home</div>
+
+                    <div class="lyrics-verse">조용히 잠든 방을 열어 기억을 꺼내 들어
+부서진 시간 위에서 선명히 너는 떠올라
+길 잃은 맘 속에 널 가둔 채 살아
+그만, 그만</div>
+
+                    <div class="lyrics-verse">멈춘 시간 속 잠든 너를 찾아가
+아무리 막아도 결국 너의 곁인 걸
+길고 긴 여행을 끝내 이젠 돌아가
+너라는 집으로 지금 다시 way back home</div>
+
+                    <div class="lyrics-verse">세상을 뒤집어 찾으려 해
+오직 너로 완결된 이야기를
+모든 걸 잃어도 난 너 하나면 돼</div>
+
+                    <div class="lyrics-verse">빛이 다 꺼진 여기 나를 안아줘</div>
+
+                    <div class="lyrics-verse">눈을 감으면 소리 없이 밀려와
+이 마음 그 위로 넌 또 한 겹 쌓여가
+내겐 그 누구도 아닌 네가 필요해
+돌아와 내 곁에 그날까지 I'm not done</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
